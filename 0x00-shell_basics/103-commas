@@ -1,2 +1,2 @@
 #!/bin/bash
-ls -1ap | grep -v / | sort -df | tr '\n' ',' ; ls -1d . .. */; echo
+ls -amvp
