@@ -1,18 +1,25 @@
 #!/usr/bin/env bash
-#Configure your domain zone so that the subdomain www and display information about subdomains
+# shellcheck disable=SC2086
+# Bash script that will display information about subdomains.
 
-if [ "$#" = 1 ]
-then
-    subdomains=("www" "lb-01" "web-01" "web-02")
-    for sub_domain in "${subdomains[@]}"
-    do
-	record_type=$(dig $sub_domain.$1 | grep -A1 'ANSWER SECTION' | tail -1 | awk '{print $4}')
-        destination=$(dig $sub_domain.$1 | grep -A1 'ANSWER SECTION' | tail -1 | awk '{print $5}')
-	echo "The subdomain $sub_domain is a $record_type record and points to $destination"
-    done
-elif [ "$#" = 2 ]
-then
-    record_type=$(dig $2.$1 | grep -A1 'ANSWER SECTION' | tail -1 | awk '{print $4}')
-    destination=$(dig $2.$1 | grep -A1 'ANSWER SECTION' | tail -1 | awk '{print $5}')
-    echo "The subdomain $2 is a $record_type record and points to $destination"
-fi
+excute () {
+        RECORD_TYPE=$(dig "$2"."$1" | awk 'BEGIN{OFS=" ";} /^'$2'/{print $4}')
+        DESTINATION=$(dig "$2"."$1" | awk 'BEGIN{OFS=" ";} /^'$2'/{print $5}')
+        echo "The subdomain $2 is a $RECORD_TYPE record and points to $DESTINATION"
+}
+domain=$1
+subdomain=$2
+sub=( www lb-01 web-01 web-02 )
+check () {
+    if [[ $subdomain == "" ]]
+    then
+        for x in "${sub[@]}"
+        do
+            excute "$domain" "$x"
+        done
+    else
+        excute "$domain" "$subdomain"
+    fi
+    return 0
+}
+check
